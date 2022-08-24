@@ -1,8 +1,7 @@
 package main;
 
-import java.util.*;
-
-import javax.print.event.PrintEvent;
+import java.util.Scanner;
+import java.util.ArrayList;
 
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -10,61 +9,88 @@ import java.io.BufferedReader;
 public class Main {
    public static void main (String args[]) throws Exception {
 
-      //ArrayList to call elements of text file to memory
       ArrayList<ChemicalElement> chemicals = new ArrayList<ChemicalElement>();
+
+      // Load file using BufferedReader
       BufferedReader br = new BufferedReader(new FileReader("Elements.txt"));
 
-      int count = 0;
-
+      // Required variables for iterations
       String line = br.readLine();
+      int atomicNumber = 0;
+
+      // Iteration loop until EoF
       while(line != null) {
-         count++;
-         String cn = line.split(" ")[0];
-         String sb = line.split(" ")[1];
-         float an = count;
-         ChemicalElement cr = new ChemicalElement(cn,sb,an);
+
+         // Atomic Number iteration
+         atomicNumber++;
+
+         // Get data from loaded line
+         String name = line.split(" ")[0];
+         String symbol = line.split(" ")[1];
+
+         // Convert to record instance
+         ChemicalElement cr = new ChemicalElement(name, symbol, atomicNumber);
+
+         // Add to memory
          chemicals.add(cr);
+
+         // Next line
          line = br.readLine();
       }
       br.close();
 
+      // Create scanner instance
       Scanner stringScanner = new Scanner(System.in);
+
+      // Exit manual print
+      System.out.println("Type 'exit' to close the program.");
+
+      // Interface loop
       while(true) {
-         System.out.println("Please type in an element's name. Type 'exit' to close the program. \n");
 
-         //user input is recorded in inputElement
-         String inputElement = stringScanner.next();
+         // Interface printing
+         System.out.print("Element's name / atomic # / symbol: ");
 
-         if(inputElement.equalsIgnoreCase("exit")) {
-            break;
-         }
+         // User input
+         String inputElement = stringScanner.nextLine();
 
-         float an = 0;
+         // Check if exit
+         if(inputElement.equalsIgnoreCase("exit")) break;
+
+         // Check if atomic number
+         int atomicNumberToSearch = -1;
          try {
-            an = Float.parseFloat(inputElement);
-         } catch (Exception e) {
-            //TODO: handle exception
-         }
-         Boolean doesElementExist = false;
+            atomicNumberToSearch = Integer.parseInt(inputElement);
+         } catch (Exception ignored) {
+            // Not searched using atomic number
+         } 
+
+         // Flag
+         boolean doesElementExist = false;
+
+         // Enhanced for loop for linear searching
          for(ChemicalElement cr : chemicals) {
-            if(cr.atomicNumber == an || cr.chemicalName.equalsIgnoreCase(inputElement) || cr.symbol.equalsIgnoreCase(inputElement)) {
-               System.out.println(cr);
+
+            // Tests
+            if(cr.atomicNumber == atomicNumberToSearch 
+            || cr.chemicalName.equalsIgnoreCase(inputElement) 
+            || cr.symbol.equalsIgnoreCase(inputElement)) {
+
+               // If found: print, mark flag, exit loop
+               System.out.println(cr + "\n");
                doesElementExist = true;
                break;
             }
          }
-         if(!doesElementExist) {
-            System.out.println("Element does not exist. Please type in a real element. \n");
-         }
+
+         // If flag is false, print error
+         if(!doesElementExist) System.out.println("Element does not exist. Please type in a real element.\n");
          
       }
-      //close scanner to prevent leaks
       stringScanner.close();
-
-      return;
    }
 
-   record ChemicalElement(String chemicalName, String symbol, float atomicNumber) {
+   record ChemicalElement(String chemicalName, String symbol, int atomicNumber) {
       @Override
       public String toString () {
          return chemicalName + " (Symbol: " + symbol + ", Mass number: " + atomicNumber + ") \n";
